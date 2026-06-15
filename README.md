@@ -1,61 +1,265 @@
-# FitFindr — Starter Kit
+# FitFindr — README.md
 
-This starter kit contains everything you need to begin Project 2.
+List every tool your agent will use. For each tool, fill in all four fields.
+You must have at least 3 tools. The three required tools are listed — add any additional tools below them.
 
-## What's Included
+### Tool 1: search_listings
 
-```
-ai201-project2-fitfindr-starter/
-├── data/
-│   ├── listings.json          # 40 mock secondhand listings
-│   └── wardrobe_schema.json   # Wardrobe format + example wardrobe
-├── utils/
-│   └── data_loader.py         # Helper functions for loading the data
-├── planning.md                # Your planning template — fill this out first
-└── requirements.txt           # Python dependencies
-```
+**What it does:**
+It does get input of description, size and max_price, and then based on these values, takes a look
+at listing.json to filter out and find the best matching options and retrun them
 
-## Setup
+**Input parameters:**
 
-```bash
-pip install -r requirements.txt
-```
+<!-- List each parameter, its type, and what it represents -->
 
-Set your Groq API key in a `.env` file (get a free key at [console.groq.com](https://console.groq.com)):
-```
-GROQ_API_KEY=your_key_here
-```
+- `description` (str): like type of the cloth, is that a tee or pants, or etc?
+- `size` (str): Size of the type of the cloth
+- `max_price` (float): max price user can handle
 
-## The Mock Listings Dataset
+**What it returns:**
+Return value as Faded Band Tee — $22, Depop, Good condition."
 
-`data/listings.json` contains 40 mock secondhand listings across categories (tops, bottoms, outerwear, shoes, accessories) and styles (vintage, y2k, grunge, cottagecore, streetwear, and more).
+**What happens if it fails or returns nothing:**
+FitFindr tells the user what to try differently and stop so it doesnt call suggest_outfit
 
-Each listing has: `id`, `title`, `description`, `category`, `style_tags`, `size`, `condition`, `price`, `colors`, `brand`, and `platform`.
+---
 
-Load it with:
-```python
-from utils.data_loader import load_listings
-listings = load_listings()
-```
+### Tool 2: suggest_outfit
 
-## The Wardrobe Schema
+**What it does:**
+Gives advice on how to make it the complete the fit, how to macth certain accessories etc
+**Input parameters:**
+wardrobe and new_item
 
-`data/wardrobe_schema.json` defines the format your agent uses to represent a user's existing wardrobe. It includes:
+<!-- List each parameter, its type, and what it represents -->
 
-- `schema`: field definitions for a wardrobe item
-- `example_wardrobe`: a sample wardrobe with 10 items you can use for testing
-- `empty_wardrobe`: a starting template for a new user
+- `new_item` (dict): whats given/chosen from seacrh_listing
+- `wardrobe` (dict): what the user has already have
 
-Load an example wardrobe with:
-```python
-from utils.data_loader import get_example_wardrobe
-wardrobe = get_example_wardrobe()
-```
+**What it returns:**
+returns suggestion sentence and also makes a referral to user wardrobe to show how well it fits
 
-## Where to Start
+**What happens if it fails or returns nothing:**
+There is a get_empty_wardrobe() function, that would have been called
 
-1. **Read `planning.md` and fill it out before writing any code.**
-2. Verify the data loads correctly by running `python utils/data_loader.py`.
-3. Build and test each tool individually before connecting them through your planning loop.
+---
 
-Your implementation files go in this same directory. There's no required file structure for your agent code — organize it however makes sense for your design.
+### Tool 3: create_fit_card
+
+**What it does:**
+Takes the suggestion, converts that and describes thats as a full complete look
+
+**Input parameters:**
+
+- `outfit` (str):takes outfit suggestion
+- 'new_item' (str): what could be added
+
+**What it returns:**
+
+It returns full description of the look
+
+**What happens if it fails or returns nothing:**
+Should be using a helper function
+
+---
+
+### Additional Tools (if any)
+
+---
+
+## Planning Loop
+
+**How does your agent decide which tool to call next?**
+
+## Planning Loop
+
+The agent follows this workflow:
+
+1. Call `search_listings`.
+   - Uses the user's description, size, and budget to find matching items.
+   - If no listings are found, the agent tells the user to adjust their search criteria and stops.
+
+2. Call `suggest_outfit`.
+   - Uses the selected item and the user's wardrobe to generate styling recommendations.
+   - If wardrobe data is missing, the helper function `get_empty_wardrobe()` is used.
+   - If no suggestions can be generated, the agent returns a fallback styling message.
+
+3. Call `create_fit_card`.
+   - Combines the selected item and outfit suggestions into a complete outfit description.
+   - Returns a final "Fit Card" showing the recommended look.
+
+## The process ends after the Fit Card is generated and returned to the user.
+
+## State Management
+
+**How does information from one tool get passed to the next?**
+
+## How does information from one tool get passed to the next?
+
+The agent stores information in a session state object throughout the conversation.
+
+Tracked data includes:
+
+- User clothing description
+- Desired size
+- Maximum budget
+- Selected listing from search_listings
+- User wardrobe data
+- Outfit recommendations
+
+Data flow:
+
+1. `search_listings`
+   - Receives description, size, and max_price.
+   - Returns the best matching clothing item.
+   - The returned item is stored as `selected_item`.
+
+2. `suggest_outfit`
+   - Receives `selected_item` and `wardrobe`.
+   - Generates styling recommendations.
+   - Stores the result as `outfit_suggestion`.
+
+3. `create_fit_card`
+   - Receives `selected_item` and `outfit_suggestion`.
+   - Creates a complete Fit Card describing the final look.
+
+The agent passes outputs from one tool directly into the inputs of the next tool until the final recommendation is generated.
+
+## Error Handling
+
+For each tool, describe the specific failure mode you're handling and what the agent does in response.
+
+| Tool            | Failure mode                          | Agent response                                                                   |
+| --------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
+| search_listings | No results match the query            | Stop the workflow and ask the user to adjust their description, size, or budget. |
+| suggest_outfit  | Wardrobe is empty                     | call get_wardrobeempty helpfer function                                          |
+| create_fit_card | Outfit input is missing or incomplete | Use fallback data from get_empty_wardrobe() or return a simplified Fit Card.     |
+
+---
+
+## Architecture
+
+     ## Architecture
+
+User Query
+│
+▼
+Planning Loop
+│
+│ reads user inputs:
+│ description, size, max_price
+│
+▼
+search_listings(description, size, max_price)
+│
+├── results = []
+│ ▼
+│ [ERROR] No listings found
+│ ▼
+│ Return message asking user to change search
+│
+└── results = [item, ...]
+▼
+Session State:
+selected_item = results[0]
+│
+▼
+suggest_outfit(selected_item, wardrobe)
+│
+├── wardrobe is empty
+│ ▼
+│ get_empty_wardrobe()
+│ ▼
+│ Generate basic styling advice
+│
+└── outfit suggestion created
+▼
+Session State:
+outfit_suggestion = suggestion
+│
+▼
+create_fit_card(outfit_suggestion, selected_item)
+│
+├── missing outfit data
+│ ▼
+│ [ERROR] Return simplified Fit Card
+│
+└── fit card created
+▼
+Session State:
+fit_card = final look description
+│
+▼
+Return Fit Card to User
+
+## AI Tool Plan
+
+I used ChatGPT and Claude to help implement the FitFindr agent.
+First, i took a look at the functions by myself, and ry to complete them, then ask to AI what am I missing, how to make it better etc
+
+I verified the generated code by testing:
+
+- A successful search that produces a complete Fit Card.
+- A search with no matching listings.
+- An empty wardrobe.
+- Missing or incomplete outfit information.
+
+## A Complete Interaction (Step by Step)
+
+**Example user query:** "I'm looking for a vintage graphic tee under $30. I mostly wear baggy jeans and chunky sneakers. What's out there and how would I style it?"
+
+**Step 1:**
+
+The agent calls search_listing with :
+description="vintage graphic tee",
+size="M",
+max_price=30
+
+The tool searches listings.json and returns:
+
+{
+"title": "Faded Band Tee",
+"price": 22,
+"platform": "Depop",
+"condition": "Good"
+}
+
+**Step 2:**
+The agent calls:
+
+suggest_outfit(
+selected_item,
+wardrobe={
+"pants": ["baggy jeans"],
+"shoes": ["chunky sneakers"]
+}
+)
+
+The tool returns:
+
+"Pair the Faded Band Tee with your baggy jeans and chunky sneakers. Add a silver chain and oversized jacket for a vintage streetwear look."
+
+The result is stored as: outfit_suggestion = "Pair the Faded Band Tee..."
+
+**Step 3:**
+
+The agent calls:
+
+create_fit_card(
+outfit_suggestion,
+selected_item
+)
+
+The tool generates a complete Fit Card describing the outfit.
+
+The result is stored as: fit_card = "Vintage streetwear outfit featuring..."
+
+**Final output to user:**
+
+Recommended Item: Faded Band Tee ($22, Depop, Good Condition)
+
+Style Suggestion: Pair it with your baggy jeans and chunky sneakers.
+Add a silver chain and oversized jacket.
+
+Fit Card: A vintage-inspired streetwear outfit centered around the Faded Band Tee. The relaxed fit of the baggy jeans and chunky sneakers creates a balanced casual look, while the accessories add personality and complete the outfit.
