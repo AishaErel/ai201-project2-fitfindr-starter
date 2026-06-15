@@ -1,76 +1,11 @@
 # FitFindr — README.md
 
-List every tool your agent will use. For each tool, fill in all four fields.
-You must have at least 3 tools. The three required tools are listed — add any additional tools below them.
-
+FitFindr is a fashion recommendation agent that helps users find secondhand clothing items and generate outfit ideas.
 ### Tool 1: search_listings
 
 **What it does:**
 It does get input of description, size and max_price, and then based on these values, takes a look
 at listing.json to filter out and find the best matching options and retrun them
-
-**Input parameters:**
-
-<!-- List each parameter, its type, and what it represents -->
-
-- `description` (str): like type of the cloth, is that a tee or pants, or etc?
-- `size` (str): Size of the type of the cloth
-- `max_price` (float): max price user can handle
-
-**What it returns:**
-Return value as Faded Band Tee — $22, Depop, Good condition."
-
-**What happens if it fails or returns nothing:**
-FitFindr tells the user what to try differently and stop so it doesnt call suggest_outfit
-
----
-
-### Tool 2: suggest_outfit
-
-**What it does:**
-Gives advice on how to make it the complete the fit, how to macth certain accessories etc
-**Input parameters:**
-wardrobe and new_item
-
-<!-- List each parameter, its type, and what it represents -->
-
-- `new_item` (dict): whats given/chosen from seacrh_listing
-- `wardrobe` (dict): what the user has already have
-
-**What it returns:**
-returns suggestion sentence and also makes a referral to user wardrobe to show how well it fits
-
-**What happens if it fails or returns nothing:**
-There is a get_empty_wardrobe() function, that would have been called
-
----
-
-### Tool 3: create_fit_card
-
-**What it does:**
-Takes the suggestion, converts that and describes thats as a full complete look
-
-**Input parameters:**
-
-- `outfit` (str):takes outfit suggestion
-- 'new_item' (str): what could be added
-
-**What it returns:**
-
-It returns full description of the look
-
-**What happens if it fails or returns nothing:**
-Should be using a helper function
-
----
-
-### Additional Tools (if any)
-
----
-
-## Planning Loop
-
-**How does your agent decide which tool to call next?**
 
 ## Planning Loop
 
@@ -92,10 +27,6 @@ The agent follows this workflow:
 ## The process ends after the Fit Card is generated and returned to the user.
 
 ## State Management
-
-**How does information from one tool get passed to the next?**
-
-## How does information from one tool get passed to the next?
 
 The agent stores information in a session state object throughout the conversation.
 
