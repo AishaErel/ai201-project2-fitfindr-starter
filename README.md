@@ -194,3 +194,9 @@ Style Suggestion: Pair it with your baggy jeans and chunky sneakers.
 Add a silver chain and oversized jacket.
 
 Fit Card: A vintage-inspired streetwear outfit centered around the Faded Band Tee. The relaxed fit of the baggy jeans and chunky sneakers creates a balanced casual look, while the accessories add personality and complete the outfit.
+
+# AI USAGE
+For the tools implementaion, I have tried to do own my own, but I  needed some help for the parts I got stuck on and AI helped me with that
+I modified the suggested implementation to match the project requirements and added explicit error handling for empty search results.
+
+For the agent.py implementation, I used the help of AI more heacily such as describing what I need to do, so asking for clear steps and guidance on completing that. 
